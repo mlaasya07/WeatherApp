@@ -5,12 +5,22 @@ const BASE_URL = 'https://api.openweathermap.org';
 
 export async function searchLocations(query: string) {
   try {
-    const response = await fetch(
-      `${BASE_URL}/geo/1.0/direct?q=${encodeURIComponent(query)}&limit=5&appid=${API_KEY}`
-    );
+    if (!API_KEY) {
+      throw new Error('OpenWeather API key is not configured. Please check your .env file.');
+    }
+
+    const url = `${BASE_URL}/geo/1.0/direct?q=${encodeURIComponent(query)}&limit=5&appid=${API_KEY}`;
+    const response = await fetch(url);
     
     if (!response.ok) {
-      throw new Error('Failed to fetch locations');
+      const errorText = await response.text();
+      console.error('OpenWeather API Error:', {
+        status: response.status,
+        statusText: response.statusText,
+        responseText: errorText,
+        endpoint: url.replace(API_KEY, '[REDACTED]')
+      });
+      throw new Error(`Failed to fetch locations: ${response.status} ${response.statusText}`);
     }
     
     const data = await response.json();
@@ -23,18 +33,31 @@ export async function searchLocations(query: string) {
     }));
   } catch (error) {
     console.error('Error searching locations:', error);
-    throw error;
+    if (error instanceof Error) {
+      throw new Error(`Location search failed: ${error.message}`);
+    }
+    throw new Error('An unexpected error occurred while searching locations');
   }
 }
 
 export async function fetchCurrentWeather(lat: number, lon: number) {
   try {
-    const response = await fetch(
-      `${BASE_URL}/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${API_KEY}`
-    );
+    if (!API_KEY) {
+      throw new Error('OpenWeather API key is not configured. Please check your .env file.');
+    }
+
+    const url = `${BASE_URL}/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${API_KEY}`;
+    const response = await fetch(url);
     
     if (!response.ok) {
-      throw new Error('Failed to fetch current weather');
+      const errorText = await response.text();
+      console.error('OpenWeather API Error:', {
+        status: response.status,
+        statusText: response.statusText,
+        responseText: errorText,
+        endpoint: url.replace(API_KEY, '[REDACTED]')
+      });
+      throw new Error(`Failed to fetch current weather: ${response.status} ${response.statusText}`);
     }
     
     const data = await response.json();
@@ -57,18 +80,31 @@ export async function fetchCurrentWeather(lat: number, lon: number) {
     };
   } catch (error) {
     console.error('Error fetching current weather:', error);
-    throw error;
+    if (error instanceof Error) {
+      throw new Error(`Current weather fetch failed: ${error.message}`);
+    }
+    throw new Error('An unexpected error occurred while fetching current weather');
   }
 }
 
 export async function fetchHistoricalWeather(lat: number, lon: number): Promise<HistoricalTemp[]> {
   try {
-    const response = await fetch(
-      `${BASE_URL}/data/2.5/forecast?lat=${lat}&lon=${lon}&units=metric&appid=${API_KEY}`
-    );
+    if (!API_KEY) {
+      throw new Error('OpenWeather API key is not configured. Please check your .env file.');
+    }
+
+    const url = `${BASE_URL}/data/2.5/forecast?lat=${lat}&lon=${lon}&units=metric&appid=${API_KEY}`;
+    const response = await fetch(url);
     
     if (!response.ok) {
-      throw new Error('Failed to fetch historical weather');
+      const errorText = await response.text();
+      console.error('OpenWeather API Error:', {
+        status: response.status,
+        statusText: response.statusText,
+        responseText: errorText,
+        endpoint: url.replace(API_KEY, '[REDACTED]')
+      });
+      throw new Error(`Failed to fetch historical weather: ${response.status} ${response.statusText}`);
     }
     
     const data = await response.json();
@@ -87,6 +123,9 @@ export async function fetchHistoricalWeather(lat: number, lon: number): Promise<
     return dailyTemps;
   } catch (error) {
     console.error('Error fetching historical weather:', error);
-    throw error;
+    if (error instanceof Error) {
+      throw new Error(`Historical weather fetch failed: ${error.message}`);
+    }
+    throw new Error('An unexpected error occurred while fetching historical weather');
   }
 }
