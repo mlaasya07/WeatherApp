@@ -5,6 +5,12 @@ require('dotenv').config(); // Load environment variables from .env file
 const app = express();
 const port = process.env.PORT || 3000;
 
+// Define a route for the root URL /
+app.get('/', (req, res) => {
+  res.send('Welcome to the Weather App! Use the /weather endpoint to get weather data.');
+});
+
+// Define a route for /weather
 app.get("/weather", async (req, res) => {
   const city = req.query.city;
   const apiKey = process.env.OPENWEATHER_API_KEY;
